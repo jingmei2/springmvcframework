@@ -32,6 +32,14 @@
       <artifactId>spring-webmvc</artifactId>
       <version>4.3.18.RELEASE</version>
     </dependency>
+    <!--导入 servlet 的包-->
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <version>3.1.0</version>
+      <scope>provided</scope>
+    </dependency>
+
   </dependencies>
 
   <build>
