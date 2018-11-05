@@ -1,4 +1,5 @@
 package com.magi.demo.service;
 
-public class IDemoService {
+public interface IDemoService {
+    public String get(String name);
 }

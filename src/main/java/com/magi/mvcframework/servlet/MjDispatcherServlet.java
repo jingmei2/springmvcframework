@@ -1,4 +1,4 @@
-package com.magi.mvcframework;
+package com.magi.mvcframework.servlet;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;

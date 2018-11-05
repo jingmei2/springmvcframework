@@ -28,7 +28,7 @@
   <servlet>
     <servlet-name>mjmvc</servlet-name>
     <!--自定义使用自己的servlet-->
-    <servlet-class>com.magi.mvcframework.MjDispatcherServlet</servlet-class>
+    <servlet-class>com.magi.mvcframework.servlet.MjDispatcherServlet</servlet-class>
     <init-param>
       <param-name>contextConfigLocation</param-name>
       <!--<param-value>applicationContext.xml</param-value>-->
