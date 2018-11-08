@@ -23,7 +23,7 @@ public class DemoAction {
             e.printStackTrace();
         }
     }
-    @MjRequestMapping("add")
+    @MjRequestMapping("/add")
     public void add(HttpServletRequest request,HttpServletResponse response, Integer a,Integer b){
             try {
             response.getWriter().write(a+"+"+b+"="+(a+b));
@@ -31,7 +31,7 @@ public class DemoAction {
             e.printStackTrace();
         }
     }
-    @MjRequestMapping("remove")
+    @MjRequestMapping("/remove")
     public void remove(HttpServletRequest request,HttpServletResponse response, Integer id){
         try {
             response.getWriter().write(id);
