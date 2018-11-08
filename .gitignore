@@ -30,4 +30,4 @@ hs_err_pid*
 */vcs.xml
 .gitignore
 src/test/
-target/generated-sources/
+target/*
