@@ -14,4 +14,10 @@ public class DemoService implements IDemoService {
         long time = System.currentTimeMillis();
         return "My name is " + name + " " + time;
     }
+
+    public static void main(String[] args) {
+        String str = "com.magi.demo";
+        String name = str.replaceAll("\\.","/");
+        System.out.println(name);
+    }
 }

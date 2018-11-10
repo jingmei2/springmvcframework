@@ -5,12 +5,14 @@ import com.magi.mvcframework.annotation.MjController;
 import com.magi.mvcframework.annotation.MjRequestMapping;
 import com.magi.mvcframework.annotation.MjService;
 
+import javax.naming.Name;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
@@ -33,12 +35,46 @@ public class MjDispatcherServlet extends HttpServlet{
     /**
      * IOC 容器
      */
-    private Map<String,Object> ioc = new HashMap<>();
+    private Map<String,Object> ioc = new HashMap<String,Object>();
+
+    /**
+     * handleMapping
+     */
+    private Map<String,Method> handleMapping = new HashMap<>();
 
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 //        super.doPost(req, resp);
+        //调用 doGet 或者 doPost 方法,将结果输出到浏览器
+        try {
+            //找到 Method方法,通过反射机制 invoker, 再将返回的结果交给 IOC 容器
+            doDispatch(req,resp);
+        } catch (Exception e) {
+            e.printStackTrace();
+            //处理异常
+            resp.getWriter().write("500 Exception" + Arrays.toString(e.getStackTrace()));
+        }
 
+    }
+
+    private void doDispatch(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        //拿到请求,处理请求
+        if (this.handleMapping.isEmpty()){return;}
+        //访问的地址
+        String url = req.getRequestURI();
+        String contextPath = req.getContextPath();
+        url.replaceAll(contextPath,"").replaceAll("/+","/");
+        //判断handleMapping是否含有这个 url
+        if (!this.handleMapping.containsKey(url)){
+            resp.getWriter().write("404 Not Found!!");
+            return;
+        }
+        //根据 url 取到方法
+        Method method = this.handleMapping.get(url);
+        Map<String,String[]> params = req.getParameterMap();
+        //方法反射得到对象,加入到 IOC 容器中
+        String beanName = lowerFristCase(method.getDeclaringClass().getSimpleName());
+        method.invoke(ioc.get(beanName),new Object []{req,resp},params.get("name")[0]);
     }
 
     @Override
@@ -69,7 +105,11 @@ public class MjDispatcherServlet extends HttpServlet{
         //能够将一个 URL 和一个 method 进行一个关联映射
         initHandlerMapping();
 
-
+        if (ioc.isEmpty()){
+            System.out.println("MjSpring MVC 's IOC is null");
+        } else {
+            System.out.println("MjSpring MVC is init");
+        }
     }
 
     private void initHandlerMapping() {
@@ -89,9 +129,18 @@ public class MjDispatcherServlet extends HttpServlet{
 
             //开始扫描所有类 获取所有公共方法
             Method [] methods = clazz.getMethods();
+            for (Method method : methods){
+                //判断注解的类
+                if (!method.isAnnotationPresent(MjRequestMapping.class)){continue;}
 
+                MjRequestMapping requestMapping = method.getAnnotation(MjRequestMapping.class);
+                String url = (("/"+baseUrl+"/"+requestMapping.value()).replaceAll("/+","/"));
 
+                //把访问地址和方法映射到handleMapping里面
+                handleMapping.put(url,method);
 
+                System.out.println("Mapped:"+url+","+method);
+            }
 
         }
     }
@@ -189,9 +238,34 @@ public class MjDispatcherServlet extends HttpServlet{
     }
 
     private void doScanner(String scanPackage) {
-        URL url = this.getClass().getClassLoader().getResource("/"+scanPackage.replaceAll("\\.","/"));
+        //扫描到编译成功后的类的相对地址
+        //Todo
+        URL url = this.getClass().getClassLoader().getResource("../../target/classes/"+scanPackage.replaceAll("\\.","/"));
 
         File classDir = new File(url.getFile());
+
+        //递归判断 判断文件夹 并且扫描出所有的 class 文件
+
+//        File[] files = classDir.listFiles(new FileFilter() {
+//            @Override
+//            public boolean accept(File pathname) {
+//                // TODO Auto-generated method stub
+//                String KEY_PRE = ".class";
+//                if (pathname.isFile()&&pathname.getName().endsWith(KEY_PRE)) {
+//
+//                    return true;
+//                }
+//                    return false;
+//            }
+//        });
+//
+//        for (int i = 0; i < files.length; i++) {
+//            File file = files[i];
+//            System.out.println(files[i].getName());
+//            if (!file.getName().contains(".class")){continue;}
+//                String className = scanPackage + "." + file.getName().replace(".class","").trim();
+//                classNames.add(className);
+//        }
 
         for (File file:classDir.listFiles()){
 
@@ -199,7 +273,7 @@ public class MjDispatcherServlet extends HttpServlet{
             if (file.isDirectory()){
                 doScanner(scanPackage + "." + file.getName());
             } else {
-                if (file.getName().contains(".class")){continue;}
+                if (!file.getName().contains(".class")){continue;}
                 String className = scanPackage + "." + file.getName().replace(".class","").trim();
                 classNames.add(className);
             }
@@ -209,6 +283,8 @@ public class MjDispatcherServlet extends HttpServlet{
 
     private void doLoadConfig(String contextConfigLocation) {
         //从类的路径下 取得 properties
+        //Todo
+        //需要兼容 classpath:* 这样的写法
         InputStream is = this.getClass().getClassLoader().getResourceAsStream(contextConfigLocation);
         try {
             contextConfig.load(is);
@@ -225,4 +301,5 @@ public class MjDispatcherServlet extends HttpServlet{
 
         }
     }
+
 }

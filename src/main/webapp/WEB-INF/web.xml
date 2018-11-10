@@ -33,7 +33,7 @@
       <param-name>contextConfigLocation</param-name>
       <!--<param-value>applicationContext.xml</param-value>-->
       <!--Spring建立在IoC容器核心功能之上的其他重要功能有：AOP(面向切面编程)，事务管理，springMVC，ORM等，这些功能都在Spring的核心配置文档applicationContext.xml中得以体现。-->
-      <param-value>classpath*:application.properties</param-value>
+      <param-value>application.properties</param-value>
     </init-param>
     <load-on-startup>1</load-on-startup>
   </servlet>
