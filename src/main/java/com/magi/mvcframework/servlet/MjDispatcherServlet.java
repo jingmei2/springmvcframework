@@ -74,6 +74,8 @@ public class MjDispatcherServlet extends HttpServlet{
         Map<String,String[]> params = req.getParameterMap();
         //方法反射得到对象,加入到 IOC 容器中
         String beanName = lowerFristCase(method.getDeclaringClass().getSimpleName());
+
+        //Todo 还有其他方法获取参数的 key,value, 不需要写死
         method.invoke(ioc.get(beanName),new Object []{req,resp},params.get("name")[0]);
     }
 
@@ -214,9 +216,6 @@ public class MjDispatcherServlet extends HttpServlet{
                         if (ioc.containsKey(ifs.getName())){
                             throw new Exception("The beanName is exists:"+ifs.getName());
                         }
-//                        String interFaceName = interFaces.getSimpleName();
-//
-//                        Object obj = interFaces.getSuperclass().newInstance();
                         ioc.put(ifs.getName(),instance);
 
                     }
@@ -239,7 +238,7 @@ public class MjDispatcherServlet extends HttpServlet{
 
     private void doScanner(String scanPackage) {
         //扫描到编译成功后的类的相对地址
-        //Todo
+        //Todo 扫描编译成功后的 class 文件 不需要写死
         URL url = this.getClass().getClassLoader().getResource("../../target/classes/"+scanPackage.replaceAll("\\.","/"));
 
         File classDir = new File(url.getFile());
@@ -283,8 +282,7 @@ public class MjDispatcherServlet extends HttpServlet{
 
     private void doLoadConfig(String contextConfigLocation) {
         //从类的路径下 取得 properties
-        //Todo
-        //需要兼容 classpath:* 这样的写法
+        //Todo 需要兼容 classpath:* 这样的写法
         InputStream is = this.getClass().getClassLoader().getResourceAsStream(contextConfigLocation);
         try {
             contextConfig.load(is);
