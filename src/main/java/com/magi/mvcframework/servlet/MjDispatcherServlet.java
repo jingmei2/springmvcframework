@@ -57,6 +57,20 @@ public class MjDispatcherServlet extends HttpServlet{
 
     }
 
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+//        super.doGet(req, resp);
+        //调用 doGet 或者 doPost 方法,将结果输出到浏览器
+        try {
+            //找到 Method方法,通过反射机制 invoker, 再将返回的结果交给 IOC 容器
+            doDispatch(req,resp);
+        } catch (Exception e) {
+            e.printStackTrace();
+            //处理异常
+            resp.getWriter().write("500 Exception" + Arrays.toString(e.getStackTrace()));
+        }
+    }
+
     private void doDispatch(HttpServletRequest req, HttpServletResponse resp) throws Exception {
         //拿到请求,处理请求
         if (this.handleMapping.isEmpty()){return;}
@@ -66,7 +80,7 @@ public class MjDispatcherServlet extends HttpServlet{
         url.replaceAll(contextPath,"").replaceAll("/+","/");
         //判断handleMapping是否含有这个 url
         if (!this.handleMapping.containsKey(url)){
-            resp.getWriter().write("404 Not Found!!");
+            resp.getWriter().write("404 Not Found !");
             return;
         }
         //根据 url 取到方法
@@ -76,14 +90,14 @@ public class MjDispatcherServlet extends HttpServlet{
         String beanName = lowerFristCase(method.getDeclaringClass().getSimpleName());
 
         //Todo 还有其他方法获取参数的 key,value, 不需要写死
-        method.invoke(ioc.get(beanName),new Object []{req,resp},params.get("name")[0]);
+        String name = null;
+        if (params.containsKey("name")){
+            name = params.get("name")[0];
+        }
+        //这里的代理,入参的对象,入参类型格式,要和原方法一致
+        method.invoke(ioc.get(beanName),new Object []{req,resp,name});
     }
 
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-//        super.doGet(req, resp);
-        //调用 doGet 或者 doPost 方法,将结果输出到浏览器
-    }
 
     @Override
     public void init(ServletConfig config) throws ServletException {
@@ -191,10 +205,9 @@ public class MjDispatcherServlet extends HttpServlet{
                 //判断需要实例化的class
                 if (clazz.isAnnotationPresent(MjController.class)){
                     //取单纯的类名 不含有包名
-                    String beanName = lowerFristCase(clazz.getSimpleName());
+                    String name4 = clazz.getSimpleName();
+                    String beanName = lowerFristCase(name4);
                     ioc.put(beanName,clazz.newInstance());
-
-
 
                 } else if (clazz.isAnnotationPresent(MjService.class)){
 
@@ -233,7 +246,7 @@ public class MjDispatcherServlet extends HttpServlet{
     private String lowerFristCase(String simpleName) {
         char [] chars = simpleName.toCharArray();
         chars[0] += 32;
-        return chars.toString();
+        return String.valueOf(chars);
     }
 
     private void doScanner(String scanPackage) {

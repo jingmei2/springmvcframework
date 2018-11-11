@@ -12,7 +12,7 @@ public class DemoService implements IDemoService {
     @Override
     public String get(String name) {
         long time = System.currentTimeMillis();
-        return "My name is " + name + " " + time;
+        return "My name is " + name + ":" + time;
     }
 
     public static void main(String[] args) {
