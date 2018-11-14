@@ -12,7 +12,7 @@
 .mtj.tmp/
 
 # Package Files #
-../lib/spring-context-4.3.18.RELEASE.jar
+lib/spring-context-4.3.18.RELEASE.jar
 *.war
 *.nar
 *.ear
