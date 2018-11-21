@@ -20,9 +20,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.*;
 
-/**
- * @author magi
- */
+
 public class MjDispatcherServlet extends HttpServlet{
 
     private Properties contextConfig = new Properties();
